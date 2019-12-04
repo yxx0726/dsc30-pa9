@@ -123,7 +123,7 @@ public class SpellChecker implements ISpellChecker {
      *          two characters.
      */
     private LinkedList<String> checkTransposedLetter( String word ) {
-        if(word.length() < 2){
+        if(word.length() < 2) {
             return null;
         }
         LinkedList<String> result = new LinkedList<>();
@@ -135,12 +135,12 @@ public class SpellChecker implements ISpellChecker {
             }
         }
         else {
-            String s1 = word.substring(1,2)+word.substring(0,1)+word.substring(2);
+            String s1 = word.substring(1, 2)+word.substring(0, 1)+word.substring(2);
             if (dictionary.lookup(s1)) {
                 result.add(s1);
             }
             for (int i = 0; i <= word.length() - 3; i++) {
-                String s2 = word.substring(0, i+1) + word.charAt(i + 2) + word.charAt(i + 1) +
+                String s2 = word.substring(0, i + 1) + word.charAt(i + 2) + word.charAt(i + 1) +
                         word.substring(i + 3);
                 if (dictionary.lookup(s2)) {
                     result.add(s2);
@@ -223,14 +223,14 @@ public class SpellChecker implements ISpellChecker {
             }
 
             temp = checkInsertSpace(word);
-            for(int i = 0; i < temp.size();i++){
+            for(int i = 0; i < temp.size(); i++){
                 if(!all.contains(temp.get(i))) {
                     all.add(temp.get(i));
                 }
             }
 
             String[] result =  new String[all.size()];
-            for (int i = 0; i < result.length;i++){
+            for (int i = 0; i < result.length; i++){
                 result[i] = all.get(i);
             }
             return result;
@@ -257,42 +257,41 @@ public class SpellChecker implements ISpellChecker {
             //TODO - call readDictionary with the given reader.
             checker.readDictionary(reader);
 
-        } catch ( FileNotFoundException e ) {
+        } catch (FileNotFoundException e) {
             System.err.println( "Failed to open " + dictionary );
-            System.exit( 1 );
+            System.exit(1);
         }
 
-        File inputFile = new File( args[ 1 ] );
+        File inputFile = new File(args[ 1 ]);
         try {
-            Scanner input = new Scanner( inputFile ); // Reads list of words
+            Scanner input = new Scanner( inputFile );
 
             //TODO - go through each word from Scanner
             while (input.hasNext()) {
 
                 String word = input.next().toLowerCase();
 
-                if(checker.dictionary.lookup(word)){
-                    System.out.println(word+": ok");
+                if (checker.dictionary.lookup(word)){
+                    System.out.println(word + ": ok");
                 }
-
-                else if(checker.checkWord(word).length == 0){
-                    System.out.println(word+": not found");
+                else if (checker.checkWord(word).length == 0) {
+                    System.out.println(word + ": not found");
                 }
-                else{
+                else {
                     String result = "";
 
                     String[] temp = checker.checkWord(word);
-                    for (int i = 0; i < temp.length - 1;i++){
-                        result += temp[i]+", ";
+                    for (int i = 0; i < temp.length - 1; i++) {
+                        result += temp[i] + ", ";
                     }
                     result += temp[temp.length-1];
-                    System.out.println(word+": " + result);
+                    System.out.println(word + ": " + result);
                 }
             }
 
         } catch ( FileNotFoundException e ) {
             System.err.println( "Failed to open " + inputFile );
-            System.exit( 1 );
+            System.exit(1);
         }
     }
 
