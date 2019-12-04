@@ -3,10 +3,7 @@
  * PID:
  */
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.Reader;
+import java.io.*;
 import java.util.LinkedList;
 import java.util.Scanner;
 
@@ -25,6 +22,9 @@ import java.util.Scanner;
 public class SpellChecker implements ISpellChecker {
 
     private HashTable dictionary;
+    private int tableSize = 6;
+    private int aIndex = 97;
+    private int zIndex = 122;
 
     /**
      * Reads the dictionary from a Reader input, and stores it in the
@@ -35,6 +35,13 @@ public class SpellChecker implements ISpellChecker {
     @Override
     public void readDictionary( Reader reader ) {
         //TODO
+
+        Scanner scan = new Scanner(new BufferedReader(reader));
+        dictionary = new HashTable(tableSize);
+        while (scan.hasNext()) {
+            String element = scan.next();
+            dictionary.insert(element);
+        }
     }
     
     /**
@@ -47,7 +54,16 @@ public class SpellChecker implements ISpellChecker {
      */
     private LinkedList<String> checkWrongLetter( String word ) {
         //TODO
-        return null;
+        LinkedList<String> result = new LinkedList<>();
+        for ( int i = 0; i < word.length(); i++){
+            for(int j = aIndex; j <= zIndex; j++){
+                String temp = word.substring(0,i)+(char)j+word.substring(i+1);
+                if (dictionary.lookup(temp)){
+                    result.add(temp);
+                }
+            }
+        }
+        return result;
     }
     
     /**
@@ -60,7 +76,18 @@ public class SpellChecker implements ISpellChecker {
      */
     private LinkedList<String> checkDeletedLetter( String word ) {
         //TODO
-        return null;
+        LinkedList<String> result = new LinkedList<>();
+        String first = word.substring(1);
+        if(dictionary.lookup(first)){
+            result.add(first);
+        }
+        for ( int i = 1; i < word.length(); i++){
+            String temp = word.substring(0,i)+word.substring(i+1);
+            if (dictionary.lookup(temp)){
+                result.add(temp);
+            }
+        }
+        return result;
     }
     
     /**
@@ -73,7 +100,18 @@ public class SpellChecker implements ISpellChecker {
      */
     private LinkedList<String> checkInsertedLetter( String word ) {
         //TODO
-        return null;
+        LinkedList<String> result = new LinkedList<>();
+        for ( int i = 0; i <= word.length(); i++){
+            for(int j = aIndex; j <= zIndex; j++){
+
+                String temp = word.substring(0,i)+(char)j+word.substring(i);
+
+                if (dictionary.lookup(temp)){
+                    result.add(temp);
+                }
+            }
+        }
+        return result;
     }
     
     /**
@@ -85,8 +123,31 @@ public class SpellChecker implements ISpellChecker {
      *          two characters.
      */
     private LinkedList<String> checkTransposedLetter( String word ) {
-        //TODO
-        return null;
+        if(word.length() < 2){
+            return null;
+        }
+        LinkedList<String> result = new LinkedList<>();
+        if(word.length() == 2){
+
+            String comb = word.substring(1) + word.substring(0, 1);
+            if(dictionary.lookup(comb)){
+                result.add(comb);
+            }
+        }
+        else {
+            String s1 = word.substring(1,2)+word.substring(0,1)+word.substring(2);
+            if (dictionary.lookup(s1)) {
+                result.add(s1);
+            }
+            for (int i = 0; i <= word.length() - 3; i++) {
+                String s2 = word.substring(0, i+1) + word.charAt(i + 2) + word.charAt(i + 1) +
+                        word.substring(i + 3);
+                if (dictionary.lookup(s2)) {
+                    result.add(s2);
+                }
+            }
+        }
+        return result;
     }
     
     /**
@@ -99,7 +160,15 @@ public class SpellChecker implements ISpellChecker {
      */
     private LinkedList<String> checkInsertSpace( String word ) {
         //TODO
-        return null;
+        LinkedList<String> result = new LinkedList<>();
+        for (int i = 0; i < word.length() - 1; i++){
+            String part1 = word.substring(0, i + 1);
+            String part2 = word.substring(i + 1);
+            if (dictionary.lookup(part1) && dictionary.lookup(part2)) {
+                result.add(part1 + " " + part2);
+            }
+        }
+        return result;
     }
 
     /**
@@ -119,8 +188,53 @@ public class SpellChecker implements ISpellChecker {
      */
     @Override
     public String[] checkWord( String word ) {
-        //TODO
-        return null;
+        LinkedList<String> all = new LinkedList<>();
+        LinkedList<String> temp;
+        if(dictionary.lookup(word)) {
+            return null;
+        }
+        else{
+            temp = checkWrongLetter(word);
+            for(int i = 0; i < temp.size(); i++){
+                all.add(temp.get(i));
+            }
+
+            temp = checkInsertedLetter(word);
+            for(int i = 0; i < temp.size(); i++){
+                if(!all.contains(temp.get(i))) {
+                    all.add(temp.get(i));
+                }
+            }
+
+            temp = checkDeletedLetter(word);
+            for(int i = 0; i < temp.size();i++){
+
+                if(!all.contains(temp.get(i))) {
+                    all.add(temp.get(i));
+                }
+            }
+
+            temp = checkTransposedLetter(word);
+            for(int i = 0; i < temp.size();i++){
+
+                if(!all.contains(temp.get(i))) {
+                    all.add(temp.get(i));
+                }
+            }
+
+            temp = checkInsertSpace(word);
+            for(int i = 0; i < temp.size();i++){
+                if(!all.contains(temp.get(i))) {
+                    all.add(temp.get(i));
+                }
+            }
+
+            String[] result =  new String[all.size()];
+            for (int i = 0; i < result.length;i++){
+                result[i] = all.get(i);
+            }
+            return result;
+        }
     }
 
     /**
@@ -141,6 +255,7 @@ public class SpellChecker implements ISpellChecker {
             Reader reader = new FileReader( dictionary );
 
             //TODO - call readDictionary with the given reader.
+            checker.readDictionary(reader);
 
         } catch ( FileNotFoundException e ) {
             System.err.println( "Failed to open " + dictionary );
@@ -152,6 +267,28 @@ public class SpellChecker implements ISpellChecker {
             Scanner input = new Scanner( inputFile ); // Reads list of words
 
             //TODO - go through each word from Scanner
+            while (input.hasNext()) {
+
+                String word = input.next().toLowerCase();
+
+                if(checker.dictionary.lookup(word)){
+                    System.out.println(word+": ok");
+                }
+
+                else if(checker.checkWord(word).length == 0){
+                    System.out.println(word+": not found");
+                }
+                else{
+                    String result = "";
+
+                    String[] temp = checker.checkWord(word);
+                    for (int i = 0; i < temp.length - 1;i++){
+                        result += temp[i]+", ";
+                    }
+                    result += temp[temp.length-1];
+                    System.out.println(word+": " + result);
+                }
+            }
 
         } catch ( FileNotFoundException e ) {
             System.err.println( "Failed to open " + inputFile );
